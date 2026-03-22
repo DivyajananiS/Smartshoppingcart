@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Smart Shopping Cart</title>
+  <link rel="stylesheet" href="styles.css">
+<style>
+body {
+  font-family: 'Segoe UI', sans-serif;
+  margin: 0;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #333;
+}
+
+/* 🧾 HEADER */
+header {
+  background: linear-gradient(to right, #ff7a18, #ffb347);
+  color: white;
+  padding: 20px;
+  text-align: center;
+  font-size: 24px;
+  letter-spacing: 1px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 🔍 SEARCH */
+.search {
+  text-align: center;
+  margin: 20px;
+}
+
+.search input {
+  width: 60%;
+  padding: 12px;
+  border-radius: 25px;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+/* 🛍 PRODUCTS GRID */
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 25px;
+  padding: 20px;
+}
+
+/* 📦 PRODUCT CARD */
+.card {
+  background: white;
+  width: 220px;
+  padding: 15px;
+  border-radius: 15px;
+  text-align: center;
+  transition: 0.3s;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+/* ✨ HOVER EFFECT */
+.card:hover {
+  transform: translateY(-10px) scale(1.03);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+/* 🖼 IMAGE */
+.card img {
+  width: 175px;
+  height: 175px;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  object-fit: cover;
+}
+
+/* 🏷 TITLE */
+.card h3 {
+  margin: 10px 0;
+  color: #444;
+}
+
+/* 💰 PRICE */
+.card p {
+  font-size: 18px;
+  font-weight: bold;
+  color: #ff7a18;
+}
+
+/* 🔘 BUTTON */
+button {
+  background: linear-gradient(to right, #ff512f, #dd2476);
+  border: none;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: 0.3s;
+  font-weight: bold;
+}
+
+/* 🔥 BUTTON HOVER */
+button:hover {
+  opacity: 0.85;
+  transform: scale(1.05);
+}
+
+/* 📦 SECTIONS (CART, SHIPPING, PAYMENT) */
+.cart, .shipping, .payment {
+  background: white;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 15px;
+  width: 80%;
+  max-width: 600px;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+}
+
+/* 🧾 CART LIST */
+.cart ul {
+  list-style: none;
+  padding: 0;
+}
+
+.cart li {
+  background: #f4f4f4;
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ❌ REMOVE BUTTON */
+.cart li button {
+  background: crimson;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+/* 🧍 INPUTS */
+input, select {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border-radius: 10px;
+  border: none;
+  background: #f1f1f1;
+  font-size: 14px;
+}
+
+/* 🧠 HEADINGS */
+h2 {
+  text-align: center;
+  color: #444;
+}
+
+/* 📱 RESPONSIVE */
+@media (max-width: 768px) {
+  .search input {
+    width: 90%;
+  }
+
+  .card {
+    width: 90%;
+  }
+
+  .cart, .shipping, .payment {
+    width: 90%;
+  }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🛒 Smart Kart</h1>
+</header>
+
+<!-- 🔍 SEARCH -->
+<section class="search">
+  <input type="text" id="searchBox" placeholder="Search products..." onkeyup="searchProducts()">
+</section>
+
+<!-- 🛍 PRODUCTS -->
+<section class="products" id="productList"></section>
+
+<!-- 🛒 CART -->
+<section class="cart">
+  <h2>Cart</h2>
+  <ul id="cartItems"></ul>
+  <h3>Total: ₹<span id="total">0</span></h3>
+</section>
+
+<!-- 🚚 SHIPPING -->
+<section class="shipping">
+  <h2>Shipping Details</h2>
+  <input id="name" placeholder="Full Name">
+  <input id="address" placeholder="Address">
+  <input id="phoneno" placeholder="Contact Number">
+</section>
+
+<!-- 💳 PAYMENT -->
+<section class="payment">
+  <h2>Payment</h2>
+  <select id="paymentMethod">
+    <option>UPI</option>
+    <option>Card</option>
+    <option>Cash on Delivery</option>
+  </select>
+  <button onclick="checkout()">Place Order</button>
+</section>
+
+<script>
+// 🧠 PRODUCT DATABASE
+let products = [
+  {name:"Shoes", price:1000, img:"Shoes.jpg"},
+  {name:"Bag", price:500, img:"Bag.jpg"},
+  {name:"Watch", price:1500, img:"Watch.jpg"},
+  {name:"Headphones", price:2000, img:"Headphones.jpg"},
+  {name:"T-Shirt", price:800, img:"TShirt.jpg"},
+  {name:"Laptop", price:50000, img:"Laptop.jpg"}
+];
+
+let cart = [];
+
+// 🔄 RENDER PRODUCTS
+function renderProducts(list = products) {
+  let container = document.getElementById("productList");
+  container.innerHTML = "";
+
+  list.forEach(p => {
+    container.innerHTML += `
+      <div class="card">
+        <img src="${p.img}">
+        <h3>${p.name}</h3>
+        <p>₹${p.price}</p>
+        <button onclick="addToCart('${p.name}',${p.price})">Add</button>
+      </div>
+    `;
+  });
+}
+
+// 🔍 SEARCH
+function searchProducts() {
+  let query = document.getElementById("searchBox").value.toLowerCase();
+
+  let filtered = products.filter(p =>
+    p.name.toLowerCase().includes(query)
+  );
+
+  renderProducts(filtered);
+}
+
+// ➕ ADD TO CART
+function addToCart(name, price) {
+  let item = cart.find(p => p.name === name);
+
+  if(item) item.quantity++;
+  else cart.push({name, price, quantity:1});
+
+  renderCart();
+}
+
+// ❌ REMOVE
+function removeItem(index) {
+  cart.splice(index,1);
+  renderCart();
+}
+
+// 🛒 RENDER CART
+function renderCart() {
+  let list = document.getElementById("cartItems");
+  list.innerHTML = "";
+  let total = 0;
+
+  cart.forEach((item,i)=>{
+    total += item.price * item.quantity;
+    list.innerHTML += `
+      <li>
+        ${item.name} (x${item.quantity}) - ₹${item.price*item.quantity}
+        <button onclick="removeItem(${i})">❌</button>
+      </li>`;
+  });
+
+  document.getElementById("total").innerText = total;
+}
+
+// 🚀 CHECKOUT
+function checkout() {
+  let name = document.getElementById("name").value;
+  let address = document.getElementById("address").value;
+  let payment = document.getElementById("paymentMethod").value;
+
+  fetch("http://localhost:8080/checkout", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({cart,name,address,payment})
+  })
+  .then(res=>res.text())
+  .then(data=>alert(data));
+}
+
+// INIT
+renderProducts();
+</script>
+
+</body>
+</html>
